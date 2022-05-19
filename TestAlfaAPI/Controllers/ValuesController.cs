@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 namespace TestAlfaAPI.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
-    public class ValuesController : ControllerBase
+    //[ApiController]
+    public class ValuesController : MainController  //  ControllerBase
     {
         // GET: api/<ValuesController>
         [HttpGet]
@@ -32,9 +32,14 @@ namespace TestAlfaAPI.Controllers
             var valores = new string[] { "value1", "value2" };
 
             if (valores.Length < 5000)
-                return BadRequest(); // Podemos retornar action result aqui...
+            {
+                //return BadRequest(); // Podemos retornar action result aqui...
+                CustomResponse();
+            }
 
-            return Ok(valores); // Usar action result com tipos  sem ENumerable
+            //return Ok(valores); // Usar action result com tipos  sem ENumerable
+
+            return CustomResponse(valores);
         }
 
         [HttpGet("obter-valores")]
@@ -94,6 +99,42 @@ namespace TestAlfaAPI.Controllers
         {
         }
     }
+
+    [ApiController]
+    public abstract class MainController : ControllerBase
+    { 
+        protected ActionResult CustomResponse(object result = null)
+        {
+            if (OperacaoValida())
+            { 
+                return Ok( new
+                {
+                    sucess = true,
+                    data = result
+                }); 
+            }
+
+            return BadRequest( new
+            {
+                sucess = false,
+                errors = ObterErros()
+            });
+        }
+
+        public bool OperacaoValida()
+        {
+            // Minhas validações fake
+            return true;
+        }
+
+        protected string ObterErros()
+        {
+            return ""; 
+        }
+
+    
+    }
+
 
     public class Product
     {
