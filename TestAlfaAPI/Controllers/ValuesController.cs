@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace TestAlfaAPI.Controllers
 {
+    //[ApiConventionType(typeof(DefaultApiConventions))]
     [Route("api/[controller]")]
     //[ApiController]
     public class ValuesController : MainController  //  ControllerBase
@@ -71,15 +72,16 @@ namespace TestAlfaAPI.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(Product), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //[ProducesResponseType(typeof(Product), StatusCodes.Status201Created)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ApiConventionMethod(typeof(DefaultApiConventions),nameof(DefaultApiConventions.Post))]
         public ActionResult Post(Product product) 
         {
             if (product.Id == 0) return BadRequest();
 
-            //return Ok(product); => Não pode, pois gera código 200 e não 201
+            return Ok(product); // => Não pode, pois gera código 200 e não 201
             //return CreatedAtAction("Post", product);  => Retorno 201
-            return CreatedAtAction(nameof(Post), product);
+            //return CreatedAtAction(nameof(Post), product);
         }
 
         // PUT api/<ValuesController>/5
