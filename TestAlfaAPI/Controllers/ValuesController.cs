@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -14,34 +16,92 @@ namespace TestAlfaAPI.Controllers
     {
         // GET: api/<ValuesController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public ActionResult<IEnumerable<string>> ObterTodos()
         {
-            return new string[] { "value1", "value2" };
+            var valores = new string[] { "value1", "value2" };
+
+            if (valores.Length < 5000)
+                return BadRequest(); // Podemos retornar action result aqui...
+
+            return valores; // Retornar tipos diretos em IEnumerable
         }
 
-        // GET api/<ValuesController>/5
-        [HttpGet("{id:int}")]
+        [HttpGet]
+        public ActionResult ObterResultado()
+        {
+            var valores = new string[] { "value1", "value2" };
+
+            if (valores.Length < 5000)
+                return BadRequest(); // Podemos retornar action result aqui...
+
+            return Ok(valores); // Usar action result com tipos  sem ENumerable
+        }
+
+        [HttpGet("obter-valores")]
+        public IEnumerable<string> ObterValores()
+        {
+            var valores = new string[] { "value1", "value2" };
+
+            if (valores.Length < 5000)
+            {
+                // return BadRequest(); Não se pode usar esse retorno quando usamos tipos sem Action Result
+                return null;
+            }
+
+            return valores;
+        }
+
+        // GET api/Values/obter-por-id/5
+        [HttpGet("obter-por-id/{id:int}")]
         public string Get(int id)
         {
             return "value";
         }
 
+
         // POST api/<ValuesController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public void Post([FromBody] string value)  // Vem do body do request
         {
+        }
+
+        [HttpPost]
+        [ProducesResponseType(typeof(Product), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public ActionResult Post(Product product) 
+        {
+            if (product.Id == 0) return BadRequest();
+
+            //return Ok(product); => Não pode, pois gera código 200 e não 201
+            //return CreatedAtAction("Post", product);  => Retorno 201
+            return CreatedAtAction(nameof(Post), product);
         }
 
         // PUT api/<ValuesController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public void Put([FromRoute] int id, [FromForm] Product product) //[FromRoute] fica implicito já o [FromForm] virá de um formulário
         {
         }
 
         // DELETE api/<ValuesController>/5
+        //[HttpDelete("{id}")]
+        //public void Delete(int id)
+        //{
+        //}
+
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public void Delete([FromQuery]int id)
         {
         }
+    }
+
+    public class Product
+    {
+        public int Id { get; set; }
+
+        [Required]
+        public string Name { get; set; }
+
+
     }
 }
